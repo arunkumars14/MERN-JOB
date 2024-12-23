@@ -7,7 +7,8 @@ import { AppContext } from '../context/AppContext';
 
 const Navbar = () => {
 
-    const { openSignIn } = useClerk();
+    const { openSignIn} = useClerk();
+
 
     const { user } = useUser()
 
