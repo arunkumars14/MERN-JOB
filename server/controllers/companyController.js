@@ -169,12 +169,90 @@ export const getCompanyJobApplicants = async (req, res) => {
     }
 }
 
+export const getCompanyJobApplicantsBySearch = async (req, res) => {
+    try {
+        const companyId = req.company._id;
+        const { query } = req.query;
+
+        const applications = await JobApplication.find({ companyId })
+            .populate({
+                path: "userId",
+                select: 'name image resume'
+            })
+            .populate({
+                path: "jobId",
+                match: {
+                    $or: [
+                        { title: { $regex: query, $options: 'i' } }, // Match job title partially.
+                        { location: { $regex: query, $options: 'i' } } // Match job location partially.
+                    ]
+                },
+                select: 'title location category level salary'
+            })
+            .exec();
+
+        return res.json({
+            success: true,
+            applications
+        })
+
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message,
+        })
+    }
+}
+
 export const getCompanyPostedJobs = async (req, res) => {
 
     try {
         const companyId = req.company._id;
 
         const jobs = await Job.find({ companyId });
+
+        const jobsData = await Promise.all(
+            jobs.map((async (job) => {
+                const applicants = await JobApplication.find({ jobId: job._id });
+                return { ...job.toObject(), applicants: applicants.length }
+            }))
+        )
+
+        res.json({
+            success: true,
+            jobsData : jobsData.reverse()
+        })
+
+
+
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message,
+        })
+    }
+
+}
+
+export const getCompanyPostedJobsBySearch = async (req, res) => {
+
+    try {
+        const companyId = req.company._id;
+        const { query } = req.query
+
+
+        const jobs = await Job.find({
+            $and: [
+                { companyId },
+                {
+                    $or: [
+                        { title: { $regex: query, $options: "i" } },
+                        { location: { $regex: query, $options: "i" } },
+
+                    ]
+                }
+            ]
+        });
 
         const jobsData = await Promise.all(
             jobs.map((async (job) => {

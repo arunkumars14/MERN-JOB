@@ -24,7 +24,7 @@ const JobListing = () => {
         const matchesCategory = (job) => selectedCategories.length === 0 || selectedCategories.includes(job.category);
         const matchesLocation = (job) => selectedLocations.length === 0 || selectedLocations.includes(job.location);
 
-        const matchesTilte = (job) => searchFilter.title === "" || job.title.toLowerCase().includes(searchFilter.title.toLowerCase());
+        const matchesTilte = (job) => searchFilter.title === "" || job.title.toLowerCase().includes(searchFilter.title.toLowerCase()) || job.companyId.name.toLowerCase().includes(searchFilter.title.toLowerCase()) || job.level.toLowerCase().includes(searchFilter.title.toLowerCase()) ;
 
         const matchesSearchLocation = (job) => searchFilter.location === "" || job.location.toLowerCase().includes(searchFilter.location.toLowerCase()) ;
 

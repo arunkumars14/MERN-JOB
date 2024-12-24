@@ -90,7 +90,7 @@ export const getUserJobApplications = async (req, res) => {
 
         return res.json({
             success: true,
-            applications
+            applications: applications.reverse(),
         })
 
 

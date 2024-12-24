@@ -2,6 +2,8 @@ import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import { LoaderCircleIcon } from "lucide-react";
+import { assets } from "../assets/assets";
 
 
 export const AppContext = createContext();
@@ -25,10 +27,13 @@ export const AppContextProvider = (props) => {
     const [companyData, setCompanyData] = useState(null);
     const [userData, setUserData] = useState(null);
     const [userApplications, setUserApplications] = useState([]);
+    const [userApplicationLoading, setuserApplicationLoading] = useState(true)
+    const [contextloading, setcontextloading] = useState(true)
 
 
     const fetchJobs = async () => {
         try {
+            setcontextloading(true)
             const { data } = await axios.get(backendUrl + '/api/jobs')
 
             if (data.success) {
@@ -39,11 +44,14 @@ export const AppContextProvider = (props) => {
 
         } catch (error) {
             toast.error(error.message)
+        }finally{
+            setcontextloading(false)
         }
     }
 
     const fetchCompanyData = async () => {
         try {
+            setcontextloading(true)
             const { data } = await axios.get(backendUrl + '/api/company/company', { headers: { token: companyToken } });
 
             if (data.success) {
@@ -54,11 +62,14 @@ export const AppContextProvider = (props) => {
             }
         } catch (error) {
             toast.error(error.message)
+        }finally{
+            setcontextloading(false)
         }
     }
 
     const fetchUserData = async () => {
         try {
+            setcontextloading(true)
             const token = await getToken();
             const {data} = await axios.get(backendUrl + '/api/user/user', {headers: {Authorization: `Bearer ${token}`}})
             
@@ -69,11 +80,14 @@ export const AppContextProvider = (props) => {
             }
         } catch (error) {
             toast.error(error.message);
+        }finally{
+            setcontextloading(false)
         }
     }
 
     const fetchUserApplications = async () => {
         try {
+            setuserApplicationLoading(true)
             const token = await getToken();
             const {data} = await axios.get(backendUrl + '/api/user/applications',{headers: {Authorization: `Bearer ${token}`}});
             if(data?.success){
@@ -83,6 +97,8 @@ export const AppContextProvider = (props) => {
             }
         } catch (error) {
             toast.error(error.message)
+        }finally{
+            setuserApplicationLoading(false)
         }
     }
 
@@ -105,7 +121,20 @@ export const AppContextProvider = (props) => {
     }, [user])
 
     const value = {
-        searchFilter, setSearchFilter, isSearched, setIsSearched, jobs, setJobs, showRecruiterLogin, setShowRecruiterLogin, companyToken, setCompanyToken, companyData, setCompanyData, backendUrl, userData, setUserData, userApplications, setUserApplications, fetchUserData, fetchUserApplications
+        searchFilter, setSearchFilter, isSearched, setIsSearched, jobs, setJobs, showRecruiterLogin, setShowRecruiterLogin, companyToken, setCompanyToken, companyData, setCompanyData, backendUrl, userData, setUserData, userApplications, setUserApplications, fetchUserData, fetchUserApplications, userApplicationLoading, setuserApplicationLoading
+    }
+
+    if(contextloading && userApplicationLoading){
+        return (
+            <div className="w-screen h-screen flex flex-col justify-center items-center">
+                <LoaderCircleIcon className="animate-spin text-sky-500" size={50} />
+                <div className="mt-3">
+                    <img src={assets.logo} alt="" className="" />
+                    
+                </div>
+
+            </div>
+        )
     }
 
     return (
